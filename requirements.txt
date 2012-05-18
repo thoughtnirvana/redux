@@ -1,0 +1,21 @@
+# Flask
+flask
+
+# Flask extensions
+flask-sqlalchemy
+flask-wtf
+flask-babel
+flask-cache
+flask-assets
+flask-augment
+augment
+
+# Misc 3rd party
+closure
+jsmin
+cssmin
+
+# Dev requirements
+pylint
+ipython
+ipdb

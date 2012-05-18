@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/less" href=" {{ auto_version('landing.static', filename='css/landing.less') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="offset-by-six six columns">
+        {% include 'landing/_login_form.html' %}
+    </div>
+</div>
+{% endblock %}
