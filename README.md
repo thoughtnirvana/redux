@@ -1,1 +1,1 @@
-#### Simple flask template.
+### Redux 
