@@ -65,19 +65,3 @@ def _make_app(basic_app=False):
     """
     import main
     return main.init(basic_app)
-
-def db_create():
-    """
-    Creates initial database.
-    """
-    _make_app(basic_app=True)
-    from config import db
-    db.create_all()
-
-def db_drop():
-    """
-    Creates initial database.
-    """
-    _make_app(basic_app=True)
-    from config import db
-    db.drop_all()
