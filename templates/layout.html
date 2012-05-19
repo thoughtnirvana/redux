@@ -3,10 +3,13 @@
     <head>
         <title>Redux</title>
         {% block meta_tags %}{% endblock %}
-        <link rel="stylesheet" type="text/css" href="{{ auto_version('static', filename='css/skeleton.css') }}" />
-        <link rel="stylesheet" type="text/less" href="{{ auto_version('static', filename='css/base.less') }}" />
+
+        {% assets filter='cssmin', output='css/packed.css', 'css/skeleton.css',
+        'css/base.css' %}
+            <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
+        {% endassets %}
+
         {% block styles %}{% endblock %}
-        <script type="text/javascript" src="{{ auto_version('static', filename='js/less.js') }}"></script>
         {% block head %}{% endblock %}
     </head>
 

@@ -1,7 +1,11 @@
 {% extends 'layout.html' %}
 
 {% block styles %}
-<link rel="stylesheet" type="text/less" href=" {{ auto_version('landing.static', filename='css/landing.less') }}" />
+
+{% assets filters='cssmin', output='landing/css/packed.css', 'landing/css/landing.css' %}
+    <link rel="stylesheet" type="text/css" href=" {{ ASSET_URL }}" />
+{% endassets %}
+
 {% endblock %}
 
 {% block content %}
