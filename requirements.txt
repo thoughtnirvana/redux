@@ -1,16 +1,16 @@
 # Flask
-flask
+Flask
 
 # Flask extensions
-flask-sqlalchemy
-flask-wtf
-flask-babel
-flask-cache
-flask-assets
-flask-augment
-augment
+Flask-Sqlalchemy
+Flask-Wtf
+Flask-Babel
+Flask-Cache
+Flask-Assets
+Flask-Script
 
 # Misc 3rd party
+augment
 closure
 jsmin
 cssmin
