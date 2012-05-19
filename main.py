@@ -86,7 +86,7 @@ def set_blueprints(app, blueprints):
         blueprint_name, blueprint_import_name = blueprint.split('.')[-1], blueprint
         options = dict(static_folder='static', template_folder='templates')
         if not url_prefix:
-            options['static_url_path'] = '/%s/static' % blueprint_name
+            options['static_url_path'] = '/static/%s' % blueprint_name
         blueprint_object = Blueprint(blueprint_name, blueprint_import_name, **options)
         blueprint_routes = import_string('%s.urls:routes' % blueprint_import_name, silent=True)
         if blueprint_routes:
