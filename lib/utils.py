@@ -2,9 +2,10 @@
 """
 Misc. utilities.
 """
-import re, os
+import re, os, subprocess
 
-from flask import render_template
+import config
+from flask import request, render_template
 
 def set_trace():
     """
@@ -26,6 +27,8 @@ def auto_version(endpoint, **values):
     """
     from flask import current_app as app
     from flask import url_for
+    if app.debug:
+        return url_for(endpoint, **values)
     # Check if accessing static file.
     static_root = None
     if endpoint == 'static':
@@ -42,7 +45,10 @@ def auto_version(endpoint, **values):
         filename = values.get('filename', None)
         if filename:
             file_path = os.path.join(static_root, filename)
-            values['q'] = int(os.stat(file_path).st_mtime)
+            if os.path.splitext(file_path) in ['.css', '.coffee']:
+                file_path = re.sub('(css|coffee)', {'css': 'less', 'coffee': 'js'}["\\1"], file_path)
+            if os.path.isfile(file_path):
+                values['q'] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
 def simple_form(form_type, template, success):
@@ -52,3 +58,31 @@ def simple_form(form_type, template, success):
             return success()
         return render_template(template, form=form)
     return fn
+
+def _simple_processor(ext_private, ext_public, processor):
+    if not request.path.endswith(ext_public):
+        return
+    public_file = request.path[len(config.app.static_url_path) + 1:]
+    public_file_path = os.path.join(config.app.static_folder, public_file)
+    private_file_path = public_file_path[:-len(ext_public)] + ext_private
+    # File does not exist in app static - check blueprints.
+    if not os.path.isfile(private_file_path):
+        for blueprint_name, blueprint in config.app.blueprints.iteritems():
+            if request.path.startswith(blueprint.static_url_path):
+                public_file = request.path[len(blueprint.static_url_path) + 1:]
+                public_file_path = os.path.join(blueprint.static_folder, public_file)
+                private_file_path = public_file_path[:-len(ext_public)] + ext_private
+                break
+    # If file doesn't exist in the blueprints as well, let flask handle it.
+    if not os.path.isfile(private_file_path):
+        return
+    if not os.path.isfile(public_file_path) or (os.path.getmtime(private_file_path) >=
+                                                os.path.getmtime(public_file_path)):
+        subprocess.check_output([processor, private_file_path, public_file_path], shell=False)
+
+def less_to_css():
+    return _simple_processor('.less', '.css', 'lessc')
+
+def coffee_to_js():
+    return _simple_processor('.coffee', '.js', 'coffee')
+
