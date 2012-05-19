@@ -78,11 +78,15 @@ def _simple_processor(processor, ext_private, ext_public):
         return
     if not os.path.isfile(public_file_path) or (os.path.getmtime(private_file_path) >=
                                                 os.path.getmtime(public_file_path)):
-        subprocess.check_output([processor, private_file_path, public_file_path], shell=False)
+        processor(private_file_path, public_file_path)
 
 def less_to_css():
-    return _simple_processor('lessc', '.less', '.css')
+    processor = lambda in_file, out_file: subprocess.check_output(['lessc',
+                                                                   in_file, out_file], shell=False)
+    return _simple_processor(processor, '.less', '.css')
 
 def coffee_to_js():
-    return _simple_processor('coffee', '.coffee', '.js')
+    processor = lambda in_file, out_file: subprocess.check_output(['coffee',
+                                                                   '-c', in_file], shell=False)
+    return _simple_processor(processor, '.coffee', '.js')
 
