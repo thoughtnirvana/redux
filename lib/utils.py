@@ -59,7 +59,7 @@ def simple_form(form_type, template, success):
         return render_template(template, form=form)
     return fn
 
-def _simple_processor(ext_private, ext_public, processor):
+def _simple_processor(processor, ext_private, ext_public):
     if not request.path.endswith(ext_public):
         return
     public_file = request.path[len(config.app.static_url_path) + 1:]
@@ -81,8 +81,8 @@ def _simple_processor(ext_private, ext_public, processor):
         subprocess.check_output([processor, private_file_path, public_file_path], shell=False)
 
 def less_to_css():
-    return _simple_processor('.less', '.css', 'lessc')
+    return _simple_processor('lessc', '.less', '.css')
 
 def coffee_to_js():
-    return _simple_processor('.coffee', '.js', 'coffee')
+    return _simple_processor('coffee', '.coffee', '.js')
 
