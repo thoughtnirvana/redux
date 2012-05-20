@@ -11,6 +11,7 @@ from flask.ext.babel import Babel
 from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.assets import Environment
+from flask.ext.debugtoolbar import DebugToolbarExtension
 
 
 import config
@@ -30,6 +31,7 @@ def init(basic_app=False):
     app.config.from_object(settings)
     config.app = app
     if not basic_app:
+        toolbar = DebugToolbarExtension(app)
         # Other initializations.
         for fn, values in [(set_middlewares, getattr(settings, 'MIDDLEWARES', None)),
                            (set_blueprints, getattr(settings, 'BLUEPRINTS', None)),
