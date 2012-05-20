@@ -60,16 +60,17 @@ def simple_form(form_type, template, success):
     return fn
 
 def _simple_processor(processor, ext_private, ext_public):
-    if not request.path.endswith(ext_public):
+    request_path = request.path
+    if not request_path.endswith(ext_public):
         return
-    public_file = request.path[len(config.app.static_url_path) + 1:]
+    public_file = request_path[len(config.app.static_url_path) + 1:]
     public_file_path = os.path.join(config.app.static_folder, public_file)
     private_file_path = public_file_path[:-len(ext_public)] + ext_private
     # File does not exist in app static - check blueprints.
     if not os.path.isfile(private_file_path):
         for blueprint_name, blueprint in config.app.blueprints.iteritems():
-            if request.path.startswith(blueprint.static_url_path):
-                public_file = request.path[len(blueprint.static_url_path) + 1:]
+            if blueprint.static_url_path and request_path.startswith(blueprint.static_url_path):
+                public_file = request_path[len(blueprint.static_url_path) + 1:]
                 public_file_path = os.path.join(blueprint.static_folder, public_file)
                 private_file_path = public_file_path[:-len(ext_public)] + ext_private
                 break
