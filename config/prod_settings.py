@@ -8,3 +8,4 @@ USE_X_SENDFILE = True
 ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'filename'
 
+SQLALCHEMY_DATABASE_URI = 'postgres://redux:reduxpass@localhost/redux'
