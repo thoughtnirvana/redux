@@ -90,14 +90,15 @@ def set_blueprints(app, blueprints):
         url_prefix = None
         if len(blueprint) == 2:
             blueprint, url_prefix = blueprint
-        blueprint_name, blueprint_import_name = blueprint.split('.')[-1], blueprint
-        options = dict(static_folder='static', template_folder='templates')
-        if not url_prefix:
-            options['static_url_path'] = '/static/%s' % blueprint_name
-        blueprint_object = Blueprint(blueprint_name, blueprint_import_name, **options)
-        blueprint_routes = import_string('%s.urls:routes' % blueprint_import_name, silent=True)
-        if blueprint_routes:
-            urls.set_urls(blueprint_object, blueprint_routes)
+        blueprint_object = import_string('%s:blueprint' % blueprint, silent=True)
+        if not blueprint_object:
+            blueprint_name, blueprint_import_name = blueprint.split('.')[-1], blueprint
+            options = dict(static_folder='static', template_folder='templates',
+                           static_url_path='/static/%s' % blueprint_name)
+            blueprint_object = Blueprint(blueprint_name, blueprint_import_name, **options)
+            blueprint_routes = import_string('%s.urls:routes' % blueprint_import_name, silent=True)
+            if blueprint_routes:
+                urls.set_urls(blueprint_object, blueprint_routes)
         # Can be mounted at specific prefix.
         if url_prefix:
             app.register_blueprint(blueprint_object, url_prefix=url_prefix)
