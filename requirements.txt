@@ -8,6 +8,7 @@ Flask-Babel
 Flask-Cache
 Flask-Assets
 Flask-Script
+Flask-Bcrypt
 
 # Misc 3rd party
 augment
@@ -19,3 +20,5 @@ cssmin
 pylint
 ipython
 ipdb
+tornado
+gevent
