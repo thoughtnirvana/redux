@@ -1,0 +1,10 @@
+- extends 'layout.slim'
+
+- block styles
+  - assets filters='cssmin', output='landing/css/packed.css', 'landing/css/landing.css'
+    %link rel="stylesheet" type="text/css" href=" {{ ASSET_URL }}"
+
+- block content
+  .container
+    div class="offset-by-six six columns"
+      - include 'landing/_login_form.slim'

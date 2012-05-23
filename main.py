@@ -6,7 +6,9 @@ the resulting `app` object be used.
 """
 from flask import Flask
 from flask import Blueprint
+from slimish_jinja import SlimishExtension
 from werkzeug import import_string
+from flask.ext.bcrypt import Bcrypt
 from flask.ext.babel import Babel
 from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -49,6 +51,9 @@ def init(basic_app=False):
         Babel(app)
         Environment(app)
         config.cache = Cache(app)
+        app.jinja_env.add_extension(SlimishExtension)
+        app.jinja_env.slim_debug = app.debug
+        config.bcrypt = Bcrypt(app)
     # Init SQLAlchemy wrapper.
     config.db = SQLAlchemy(app)
     return app

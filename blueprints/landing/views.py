@@ -7,7 +7,7 @@ from lib.utils import simple_form
 from .forms import LoginForm
 
 def landing():
-    return render_template('landing/landing.html')
+    return render_template('landing/landing.slim')
 
-login = simple_form(LoginForm, 'landing/login.html', lambda: 'Logged in')
+login = simple_form(LoginForm, 'landing/login.slim', lambda: 'Logged in')
 

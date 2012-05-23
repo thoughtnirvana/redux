@@ -11,6 +11,7 @@ Flask-Script
 Flask-Bcrypt
 
 # Misc 3rd party
+slimish_jinja
 augment
 closure
 jsmin
