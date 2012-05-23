@@ -1,21 +1,17 @@
 {% macro flashed(categories=True) %}
     {% if categories %}
         {% for category, msg in get_flashed_messages(with_categories=categories) %}
-            <p class={{ category }}>{{ msg }}</p>
+            <p class="{{ category }}">{{ msg }}</p>
         {% endfor %}
     {% else %}
         {% for msg in get_flashed_messages() %}
-            <p class={{ category }}>{{ msg }}</p>
+            <p class="{{ category }}">{{ msg }}</p>
         {% endfor %}
     {% endif %}
 {% endmacro %}
 
 {% macro render_field(field) %}
-    {% set div_class = 'field' %}
-    {% if field.errors %}
-        {% set div_class = 'field-with-errors' %}
-    {% endif %}
-    <div class="{{ div_class }}">
+    <div class="{{ 'field-with-errors' if field.errors else 'field' }}">
         {% if field.errors %}
             {% for error in field.errors %}
                 <p class="error">{{ error }}</p>
