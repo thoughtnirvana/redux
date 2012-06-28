@@ -32,21 +32,10 @@ def init(basic_app=False):
     app = Flask(__name__)
     app.config.from_object(settings)
     config.app = app
+    # Init SQLAlchemy wrapper.
+    config.db = SQLAlchemy(app)
     if not basic_app:
-        toolbar = DebugToolbarExtension(app)
-        # Other initializations.
-        for fn, values in [(set_middlewares, getattr(settings, 'MIDDLEWARES', None)),
-                           (set_blueprints, getattr(settings, 'BLUEPRINTS', None)),
-                           (set_before_handlers, getattr(settings, 'BEFORE_REQUESTS', None)),
-                           (set_after_handlers, getattr(settings, 'AFTER_REQUESTS', None)),
-                           (set_log_handlers, getattr(settings, 'LOG_HANDLERS', None)),
-                           (set_context_processors, getattr(settings, 'CONTEXT_PROCESSORS', None)),
-                           (set_error_handlers, getattr(settings, 'ERROR_HANDLERS', None)),
-                           (set_template_filters, getattr(settings, 'TEMPLATE_FILTERS', None))]:
-            if values:
-                fn(app, values)
-        # URL rules.
-        urls.set_urls(app)
+        #toolbar = DebugToolbarExtension(app)
         #: Wrap the `app` with `Babel` for i18n.
         Babel(app)
         Environment(app)
@@ -54,8 +43,19 @@ def init(basic_app=False):
         app.jinja_env.add_extension(SlimishExtension)
         app.jinja_env.slim_debug = app.debug
         config.bcrypt = Bcrypt(app)
-    # Init SQLAlchemy wrapper.
-    config.db = SQLAlchemy(app)
+        # Other initializations.
+        for fn, values in [(set_middlewares, getattr(settings, 'MIDDLEWARES', None)),
+                           (set_context_processors, getattr(settings, 'CONTEXT_PROCESSORS', None)),
+                           (set_template_filters, getattr(settings, 'TEMPLATE_FILTERS', None)),
+                           (set_before_handlers, getattr(settings, 'BEFORE_REQUESTS', None)),
+                           (set_after_handlers, getattr(settings, 'AFTER_REQUESTS', None)),
+                           (set_log_handlers, getattr(settings, 'LOG_HANDLERS', None)),
+                           (set_error_handlers, getattr(settings, 'ERROR_HANDLERS', None)),
+                           (set_blueprints, getattr(settings, 'BLUEPRINTS', None))]:
+            if values:
+                fn(app, values)
+        # URL rules.
+        urls.set_urls(app)
     return app
 
 def set_middlewares(app, middlewares):

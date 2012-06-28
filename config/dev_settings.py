@@ -3,7 +3,7 @@ DEBUG = True
 #: Enable testing for development.
 TESTING = True
 #: Database to use for SQLAlchemy.
-SQLALCHEMY_DATABASE_URI = 'postgres://redux:reduxpass@localhost/redux_dev'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///tmp/dev.db'
 SQLALCHEMY_ECHO = True
 
 USE_X_SENDFILE = False

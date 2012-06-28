@@ -11,21 +11,7 @@
 body {
     font-size: 14px;
     font-family: "Helvetica Neue", Helvetica, sans-serif;
-    background-color: @white-background;
     color: @gray-body;
-}
-.ribbon {
-    height: 10px;
-    background-color: @black-ribbon;
-    color: @gray-ribbon; 
-}
-.header {
-    height: 100px;
-    background-color: @black-masthead;
-    color: white;
-    h1 {
-        color: white;
-    }
 }
 .button {
     display: inline-block;
@@ -42,10 +28,6 @@ body {
         background: darken(@green-lime, 10%);
         color: #fff;
     }
-}
-input[type="submit"] {
-    .button;
-    margin-top: 10px;
 }
 .error {
    color: @red-error;
@@ -74,4 +56,8 @@ p.error {
     -moz-box-shadow: 0 0 6px rgba(171, 41, 32, 0.5);
     box-shadow: 0 0 6px rgba(171, 41, 32, 0.5);
   }
+}
+.main-container {
+    position: relative;
+    top: 60px;
 }

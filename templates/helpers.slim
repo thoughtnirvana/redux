@@ -4,7 +4,7 @@
       p class="=category" = msg
   - else
     - for msg in get_flashed_messages()
-      p class="=category" =  msg
+      p class="flash" =  msg
 
 - macro render_field(field)
   div class="{{ 'field-with-errors' if field.errors else 'field' }}"

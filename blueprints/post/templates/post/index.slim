@@ -1,0 +1,21 @@
+- extends 'layout.slim'
+
+- block content
+  table class="table table-striped table-bordered"
+    thead
+      tr
+        th Title
+        th Body
+        %th
+        %th
+    tbody
+      - for post in object_list
+        tr
+          td = post.title
+          td = post.body
+          td
+            a href="{{ url_for('.show', id\=post.id) }}" Show
+          td
+            a href="{{ url_for('.edit', id\=post.id) }}" Edit 
+
+  a href="=url_for('.new')" class="btn" New post

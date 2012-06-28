@@ -1,21 +1,7 @@
 body {
   font-size: 14px;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
-  background-color: #f4f4f4;
   color: #433f40;
-}
-.ribbon {
-  height: 10px;
-  background-color: #171717;
-  color: #83878d;
-}
-.header {
-  height: 100px;
-  background-color: #282828;
-  color: white;
-}
-.header h1 {
-  color: white;
 }
 .button {
   display: inline-block;
@@ -30,23 +16,6 @@ body {
   font-size: 16px;
 }
 .button:hover {
-  background: #80a73e;
-  color: #fff;
-}
-input[type="submit"] {
-  display: inline-block;
-  background: #9ac157;
-  padding: 8px 10px;
-  font-weight: bold;
-  border: none;
-  color: #fff;
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  font-size: 16px;
-  margin-top: 10px;
-}
-input[type="submit"]:hover {
   background: #80a73e;
   color: #fff;
 }
@@ -81,4 +50,8 @@ p.error {
   -webkit-box-shadow: 0 0 6px rgba(171, 41, 32, 0.5);
   -moz-box-shadow: 0 0 6px rgba(171, 41, 32, 0.5);
   box-shadow: 0 0 6px rgba(171, 41, 32, 0.5);
+}
+.main-container {
+  position: relative;
+  top: 60px;
 }

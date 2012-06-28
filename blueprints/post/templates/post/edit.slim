@@ -1,0 +1,8 @@
+- extends 'layout.slim'
+
+- block content
+  .span6
+    h2 Editing post
+    - include 'post/_post_form.slim'
+    a href="{{ url_for('post.show', id\=post.id) }}" class="btn" Show
+    a href="{{ url_for('post.index', id\=post.id) }}" class="btn" Back

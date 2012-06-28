@@ -1,5 +1,6 @@
 import subprocess as sp, os, signal, sys
 import werkzeug.serving
+from werkzeug import import_string
 from flask.ext.script import Manager, prompt_bool
 import main
 
@@ -44,6 +45,10 @@ def interrupt_handler(*args, **kwargs):
 @manager.command
 def db_createall():
     "Creates database tables"
+    # create_all doesn't work if the models aren't imported
+    import_string('models', silent=True)
+    for blueprint_name, blueprint in app.blueprints.iteritems():
+        import_string('%s.models' % blueprint.import_name, silent=True)
     db.create_all()
 
 @manager.command
