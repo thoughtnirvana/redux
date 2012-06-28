@@ -53,7 +53,7 @@ def db_dropall():
         db.drop_all()
 
 @manager.command
-def createapp(name):
+def create_blueprint(name):
     """
     Creates app template.
     """
@@ -83,6 +83,63 @@ def deps_update():
     Updates dependencies.
     """
     print sp.check_output("pip install -r requirements.txt --upgrade", shell=True),
+
+@manager.command
+def create_model(name, rename=False, fields=''):
+    """
+    Creates model scaffold.
+    """
+    if '/' in name:
+        blueprint_name, model_name = name.split('/')
+        if rename:
+            output_file = 'blueprints/%s/%s.py' % (blueprint_name, model_name.lower())
+        else:
+            output_file = 'blueprints/%s/models.py' % blueprint_name
+    else:
+        model_name = name
+        if rename:
+            output_file = '%s.py' % model_name.lower()
+        else:
+            output_file = 'models.py'
+    model = create_model.model_scaffold % dict(model_name=model_name.capitalize())
+    fields = fields.split()
+
+    field_declares = []
+    field_inits = []
+    init_args = []
+    for f in fields:
+        splitted = f.split(':')
+        if len(splitted) > 1:
+            field_name, field_type = splitted[0], 'db.%s' % splitted[1]
+        else:
+            field_name, field_type = splitted[0], 'db.Text'
+        field_declares.append(create_model.field_declare % dict(field_name=field_name, field_type=field_type))
+        field_inits.append(create_model.field_init % dict(field_name=field_name))
+        init_args.append(field_name)
+
+    field_declares = '\n'.join(field_declares)
+
+    init_args = (', %s' % ', '.join(init_args)) if init_args else ''
+    init_body = '\n'.join(field_inits) if field_inits else '%spass' % (' ' * 8)
+    init_method = '    def __init__(self%s):\n%s' % (init_args, init_body)
+
+    with open(output_file, 'a') as out_file:
+        model = '%(base)s%(field_declares)s\n\n%(init_method)s' % dict(base=model,
+                                                                       field_declares=field_declares,
+                                                                       init_method=init_method)
+        out_file.write(model)
+
+create_model.model_scaffold = '''
+
+class %(model_name)s(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+'''
+create_model.field_declare = '%s%%(field_name)s = db.Column(%%(field_type)s)' % (' ' * 4)
+create_model.field_init = '%sself.%%(field_name)s = %%(field_name)s' % (' ' * 8)
+create_model.init_method = '''
+    def __init__(self%(args)s):
+        %(body)s
+'''
 
 if __name__ == '__main__':
     manager.run()
