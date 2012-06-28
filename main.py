@@ -90,15 +90,27 @@ def set_blueprints(app, blueprints):
         url_prefix = None
         if len(blueprint) == 2:
             blueprint, url_prefix = blueprint
-        blueprint_object = import_string('%s:blueprint' % blueprint, silent=True)
+        blueprint_object = import_string('%s:BLUEPRINT' % blueprint, silent=True)
         if not blueprint_object:
             blueprint_name, blueprint_import_name = blueprint.split('.')[-1], blueprint
             options = dict(static_folder='static', template_folder='templates',
                            static_url_path='/static/%s' % blueprint_name)
             blueprint_object = Blueprint(blueprint_name, blueprint_import_name, **options)
-            blueprint_routes = import_string('%s.urls:routes' % blueprint_import_name, silent=True)
-            if blueprint_routes:
-                urls.set_urls(blueprint_object, blueprint_routes)
+        blueprint_routes = import_string('%s.urls:routes' % blueprint_import_name, silent=True)
+        if blueprint_routes:
+            urls.set_urls(blueprint_object, blueprint_routes)
+
+        # Other initializations.
+        for fn, values in [(set_before_handlers, import_string('%s:BEFORE_REQUESTS' % blueprint, silent=True)),
+                           (set_before_app_handlers, import_string('%s:BEFORE_APP_REQUESTS' % blueprint, silent=True)),
+                           (set_after_handlers, import_string('%s:AFTER_REQUESTS' % blueprint, silent=True)),
+                           (set_after_app_handlers, import_string('%s:AFTER_APP_REQUESTS' % blueprint, silent=True)),
+                           (set_context_processors, import_string('%s:CONTEXT_PROCESSORS' % blueprint, silent=True)),
+                           (set_app_context_processors, import_string('%s:APP_CONTEXT_PROCESSORS' % blueprint, silent=True)),
+                           (set_error_handlers, import_string('%s:ERROR_HANDLERS' % blueprint, silent=True)),
+                           (set_app_error_handlers, import_string('%s:APP_ERROR_HANDLERS' % blueprint, silent=True))]:
+            if values:
+                fn(app, values)
         # Can be mounted at specific prefix.
         if url_prefix:
             app.register_blueprint(blueprint_object, url_prefix=url_prefix)
@@ -113,6 +125,15 @@ def set_before_handlers(app, before_handlers):
     for before in before_handlers:
         before = app.before_request(before)
 
+def set_before_app_handlers(app, before_handlers):
+    """
+    Sets before handlers.
+    When called from a blueprint, works on the application level rather than blueprint level.
+    """
+    # Register before request middlewares.
+    for before in before_handlers:
+        before = app.before_app_request(before)
+
 def set_after_handlers(app, after_handlers):
     """
     Sets after handlers.
@@ -120,6 +141,15 @@ def set_after_handlers(app, after_handlers):
     # Register before request middlewares.
     for after in after_handlers:
         after = app.after_request(after)
+
+def set_after_app_handlers(app, after_handlers):
+    """
+    Sets after handlers.
+    When called from a blueprint, works on the application level rather than blueprint level.
+    """
+    # Register before request middlewares.
+    for after in after_handlers:
+        after = app.after_app_request(after)
 
 def set_log_handlers(app, log_handlers):
     """
@@ -142,12 +172,27 @@ def set_context_processors(app, context_processors):
     """
     app.context_processor(lambda: context_processors)
 
+def set_app_context_processors(app, context_processors):
+    """
+    Sets jinja2 context processors.
+    When called from a blueprint, works on the application level rather than blueprint level.
+    """
+    app.app_context_processor(lambda: context_processors)
+
 def set_error_handlers(app, error_handlers):
     """
     Sets error handlers.
     """
     for code, fn in error_handlers:
         fn = app.errorhandler(code)(fn)
+
+def set_app_error_handlers(app, error_handlers):
+    """
+    Sets error handlers.
+    When called from a blueprint, works on the application level rather than blueprint level.
+    """
+    for code, fn in error_handlers:
+        fn = app.app_errorhandler(code)(fn)
 
 if __name__ == '__main__':
     #: Create the `app` object via :func:`init`. Run the `app`
