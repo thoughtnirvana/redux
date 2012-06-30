@@ -5,11 +5,11 @@
   = flashed()
   p
     strong Title:
-    = post.title
+  p = post.title
 
   p
     strong Body:
-    = post.body
+  p = post.body
 
-  a href="{{ url_for('post.edit', id\=post.id) }}" class="btn" Edit
-  a href="{{ url_for('post.index', id\=post.id) }}" class="btn" Back
+  a href="{{ url_for('.edit', id\=post.id) }}" class="btn btn-primary btn-small" Edit
+  a href="{{ url_for('.index') }}" class="btn btn-primary btn-small" Back

@@ -55,3 +55,6 @@ p.error {
   position: relative;
   top: 60px;
 }
+.inline {
+  display: inline;
+}
