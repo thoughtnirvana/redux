@@ -58,15 +58,16 @@ def db_dropall():
         db.drop_all()
 
 @manager.command
-def create_blueprint(name):
+def create_blueprint(name, scaffold=False, fields=''):
     """
     Creates app template.
     """
     print sp.check_output('mkdir -p blueprints/%(name)s/templates/%(name)s' % locals(), shell=True),
     for static_dir in ('css', 'js', 'img'):
         print sp.check_output('mkdir -p blueprints/%(name)s/static/%(static_dir)s' % locals(), shell=True),
-    for module in ('__init__.py', 'views.py', 'forms.py', 'models.py', 'urls.py'):
-        print sp.check_output("touch blueprints/%(name)s/%(module)s" % locals(), shell=True),
+    print sp.check_output("touch blueprints/%(name)s/__init__.py" % locals(), shell=True),
+    if scaffold:
+        create_scaffold('%(name)s/%(name)s' % dict(name=name), fields)
 
 @manager.command
 def test():
@@ -204,8 +205,7 @@ def create_form(name):
                                                       rest=form)
         out_file.write(form)
 
-create_form.imports = '''
-from flaskext.wtf import Form
+create_form.imports = '''from flaskext.wtf import Form
 from wtforms.ext.sqlalchemy.orm import model_form
 import models
 '''
@@ -232,10 +232,9 @@ def create_views(name, fields=''):
             views = '''%(imports)s\n%(rest)s''' % dict(imports=create_views.imports,
                                                        rest=views)
         out_file.write(views)
-    #create_templates(name, fields)
+    create_templates(name, fields)
 
-create_views.imports = '''
-from flask import render_template, redirect, url_for, flash, request
+create_views.imports = '''from flask import render_template, redirect, url_for, flash, request
 from config import db
 import models
 import forms
@@ -305,17 +304,6 @@ def create_templates(name, fields=''):
                                                         fields=''.join(index_fields),
                                                         field_headers=''.join(field_headers))
         out_file.write(index)
-    # Create index template.
-    with open('%s/index.slim' % output_dir, 'a') as out_file:
-        index_fields = []
-        field_headers = []
-        for f in fields:
-            index_fields.append(create_templates.index_field % dict(name=name, field_name=f))
-            field_headers.append(create_templates.index_field_header % dict(field_header=f.capitalize()))
-        index = create_templates.index_scaffold % dict(name=name,
-                                                        fields=''.join(index_fields),
-                                                        field_headers=''.join(field_headers))
-        out_file.write(index)
     # Create show template.
     with open('%s/show.slim' % output_dir, 'a') as out_file:
         show_fields = []
@@ -330,8 +318,7 @@ def create_templates(name, fields=''):
         with open('%s/%s.slim' % (output_dir, template_name), 'a') as out_file:
             out_file.write(getattr(create_templates, '%s_scaffold' % template_name) % dict(name=name))
 
-create_templates.form_scaffold = '''
-- from 'helpers.slim' import render_field
+create_templates.form_scaffold = '''- from 'helpers.slim' import render_field
 
 form method="POST" class="well"
   = form.hidden_tag()%(fields)s
@@ -340,8 +327,7 @@ form method="POST" class="well"
 '''
 create_templates.form_field = '''
   = render_field(form.%(field_name)s, class\="span4")'''
-create_templates.index_scaffold = '''
-- extends 'layout.slim'
+create_templates.index_scaffold = '''- extends 'layout.slim'
 - from 'helpers.slim' import delete_button
 
 - block content
@@ -352,7 +338,7 @@ create_templates.index_scaffold = '''
         %%th
         %%th
     tbody
-      - for post in object_list
+      - for %(name)s in object_list
         tr%(fields)s
           td
             a.btn.btn-mini.btn-info href="{{ url_for('.show', id\=%(name)s.id) }}" Show
@@ -367,8 +353,7 @@ create_templates.index_field = '''
           td = %(name)s.%(field_name)s'''
 create_templates.index_field_header = '''
         th %(field_header)s'''
-create_templates.show_scaffold = '''
-- extends 'layout.slim'
+create_templates.show_scaffold = '''- extends 'layout.slim'
 - from 'helpers.slim' import flashed
 
 - block content
@@ -381,8 +366,7 @@ create_templates.show_field = '''
     strong %(field_header)s:
   p = %(name)s.%(field_name)s
 '''
-create_templates.edit_scaffold = '''
-- extends 'layout.slim'
+create_templates.edit_scaffold = '''- extends 'layout.slim'
 
 - block content
   .span6
@@ -391,8 +375,7 @@ create_templates.edit_scaffold = '''
     a href="{{ url_for('.show', id\=%(name)s.id) }}" class="btn btn-primary btn-small" Show
     a href="{{ url_for('.index') }}" class="btn btn-primary btn-small" Back
 '''
-create_templates.new_scaffold = '''
-- extends 'layout.slim'
+create_templates.new_scaffold = '''- extends 'layout.slim'
 
 - block content
   .span6
@@ -400,6 +383,16 @@ create_templates.new_scaffold = '''
     - include '%(name)s/_%(name)s_form.slim'
     a href="=url_for('.index')" class="btn btn-primary btn-small" Back
 '''
+
+@manager.command
+def create_scaffold(name, fields=''):
+    """
+    Creates scaffold.
+    """
+    create_model(name, fields)
+    create_form(name)
+    create_views(name, fields)
+    create_routes(name)
 
 if __name__ == '__main__':
     manager.run()

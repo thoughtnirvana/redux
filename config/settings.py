@@ -17,8 +17,7 @@ CSRF_SESSION_KEY = '\x126S{\x94\xbf}o5YE\xac\x17\x8e8^_\x18z\x08\xf3z1\x97'
 #: Session signing key.
 SECRET_KEY = '\x18[F;(\x99\xbcF\xc8\xe3\xb5\x89R\xb7[\x17H\x85\xd8\xa9,\xbf\x95\xb4;\xe1\x80\x872+\x82\x93'
 #: List of blueprints to be registered with the main wsgi app.
-#BLUEPRINTS = ['blueprints.landing', 'blueprints.user', ('blueprints.post', '/posts')]
-BLUEPRINTS = []
+BLUEPRINTS = ['blueprints.landing', 'blueprints.user']
 
 #: Before request middlewares.
 BEFORE_REQUESTS = [utils.less_to_css, utils.coffee_to_js]
