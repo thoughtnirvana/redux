@@ -107,12 +107,11 @@ def create_model(name, fields=''):
         model_name = name
         output_file = 'models.py'
     model = create_model.model_scaffold % dict(model_name=model_name.capitalize())
-    fields = fields.split()
 
     field_declares = []
     field_inits = []
     init_args = []
-    for f in fields:
+    for f in fields.split():
         splitted = f.split(':')
         if len(splitted) > 1:
             field_name, field_type = splitted[0], 'db.%s' % splitted[1]
