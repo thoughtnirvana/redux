@@ -46,21 +46,23 @@ def interrupt_handler(*args, **kwargs):
 @manager.command
 def db_createall():
     "Creates database tables"
-    # db_createall doesn't work if the models aren't imported
-    import_string('models', silent=True)
-    for blueprint_name, blueprint in app.blueprints.iteritems():
-        import_string('%s.models' % blueprint.import_name, silent=True)
-    db.create_all()
+    if prompt_bool("Are you sure? You should be using migrations."):
+        # db_createall doesn't work if the models aren't imported
+        import_string('models', silent=True)
+        for blueprint_name, blueprint in app.blueprints.iteritems():
+            import_string('%s.models' % blueprint.import_name, silent=True)
+        db.create_all()
 
 @manager.command
 def db_dropall():
     "Drops all database tables"
-    # db_dropall doesn't work if the models aren't imported
-    import_string('models', silent=True)
-    for blueprint_name, blueprint in app.blueprints.iteritems():
-        import_string('%s.models' % blueprint.import_name, silent=True)
-    if prompt_bool("Are you sure ? You will lose all your data !"):
-        db.drop_all()
+    if prompt_bool("Are you sure? You should be using migrations."):
+        # db_dropall doesn't work if the models aren't imported
+        import_string('models', silent=True)
+        for blueprint_name, blueprint in app.blueprints.iteritems():
+            import_string('%s.models' % blueprint.import_name, silent=True)
+        if prompt_bool("Are you sure ? You will lose all your data !"):
+            db.drop_all()
 
 @manager.command
 def create_blueprint(name, scaffold=False, fields=''):
