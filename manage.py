@@ -138,7 +138,7 @@ def create_model(name, fields=''):
             model = '%(imports)s\n%(rest)s' % dict(imports=create_model.imports,
                                                 rest=model)
         out_file.write(model)
-    create_migration(name, 'Create %s' % name, fields)
+    create_migration(model_name, 'Create %s' % model_name, fields)
 
 create_model.model_scaffold = '''
 
