@@ -45,7 +45,7 @@ def interrupt_handler(*args, **kwargs):
 @manager.command
 def db_createall():
     "Creates database tables"
-    # create_all doesn't work if the models aren't imported
+    # db_createall doesn't work if the models aren't imported
     import_string('models', silent=True)
     for blueprint_name, blueprint in app.blueprints.iteritems():
         import_string('%s.models' % blueprint.import_name, silent=True)
@@ -54,6 +54,10 @@ def db_createall():
 @manager.command
 def db_dropall():
     "Drops all database tables"
+    # db_dropall doesn't work if the models aren't imported
+    import_string('models', silent=True)
+    for blueprint_name, blueprint in app.blueprints.iteritems():
+        import_string('%s.models' % blueprint.import_name, silent=True)
     if prompt_bool("Are you sure ? You will lose all your data !"):
         db.drop_all()
 
@@ -284,7 +288,7 @@ def create_templates(name, fields=''):
     else:
         name = name.lower()
         output_dir = 'templates/%s' % name
-    sp.check_output('mkdir -p %s' % output_dir, shell=True),
+    sp.check_call('mkdir -p %s' % output_dir, shell=True),
     fields = [f.split(':')[0] for f in fields.split()]
     # Create form template.
     with open('%s/_%s_form.slim' % (output_dir, name), 'a') as out_file:
@@ -393,6 +397,20 @@ def create_scaffold(name, fields=''):
     create_form(name)
     create_views(name, fields)
     create_routes(name)
+
+@manager.command
+def init_migration(migrations_dir='migrations', name='migrations'):
+    """
+    Initializes migrations for the db.
+    """
+    print sp.check_output('migrate create %s %s' % (migrations_dir, name), shell=True)
+    print sp.check_output('python %s/manage.py version_control %s %s' % (migrations_dir,
+                                                                         app.config['SQLALCHEMY_DATABASE_URI'],
+                                                                         migrations_dir),
+                          shell=True)
+    print sp.check_output('migrate manage dbmigrate.py --repository=%s --url=%s' % (migrations_dir,
+                                                                                    app.config['SQLALCHEMY_DATABASE_URI']),
+                          shell=True)
 
 if __name__ == '__main__':
     manager.run()
