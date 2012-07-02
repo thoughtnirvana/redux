@@ -1,8 +1,0 @@
-- from 'helpers.slim' import render_field
-
-form action="=url_for('.login')" method="POST" class="login"
-  = form.hidden_tag()
-  = render_field(form.email, required\='required')
-  = render_field(form.password, required\='required')
-  .field
-    input type="submit"

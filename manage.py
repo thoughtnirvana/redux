@@ -1,4 +1,5 @@
-import subprocess as sp, os, signal, sys
+import re, os, signal, sys
+import subprocess as sp
 import werkzeug.serving
 from werkzeug import import_string
 from flask.ext.script import Manager, prompt_bool
@@ -136,6 +137,7 @@ def create_model(name, fields=''):
             model = '%(imports)s\n%(rest)s' % dict(imports=create_model.imports,
                                                 rest=model)
         out_file.write(model)
+    create_migration(name, 'Create %s' % name, fields)
 
 create_model.model_scaffold = '''
 
@@ -149,6 +151,54 @@ create_model.init_method = '''
     def __init__(self%(args)s):
         %(body)s
 '''
+
+@manager.command
+def create_migration(name, description, fields=''):
+    print sp.check_output('python dbmigrate.py script "%s"' % description, shell=True)
+    migration_file_pat = re.sub(r'\s+', '_', description)
+    migration_file = [f for f in os.listdir('migrations/versions') if re.search(migration_file_pat, f)]
+    if not migration_file:
+        print >>sys.stderr, "ERROR: Migration file not found. Unable to create migration"
+        return
+    if len(migration_file) > 1:
+        print >>sys.stderr, "ERROR: Ambiguous description for migration file."
+        return
+    migration_file = migration_file[0]
+    columns = []
+    for f in fields.split():
+        splitted = f.split(':')
+        if len(splitted) > 1:
+            field_name, field_type = splitted[0], '%s' % splitted[1]
+        else:
+            field_name, field_type = splitted[0], 'Text'
+        columns.append(create_migration.column % dict(field_name=field_name, field_type=field_type))
+    migration = create_migration.migration_scaffold % dict(name=name, columns=''.join(columns))
+    with open('migrations/versions/%s' % migration_file, 'w') as out_file:
+        out_file.write(migration)
+
+create_migration.migration_scaffold = '''from sqlalchemy import *
+from migrate import *
+
+meta = MetaData()
+
+%(name)s = Table(
+    '%(name)s', meta,
+    Column('id', Integer, primary_key=True),%(columns)s
+)
+
+
+def upgrade(migrate_engine):
+    meta.bind = migrate_engine
+    %(name)s.create()
+
+
+def downgrade(migrate_engine):
+    meta.bind = migrate_engine
+    %(name)s.drop()
+'''
+create_migration.column = '''
+    Column('%(field_name)s', %(field_type)s),'''
+
 
 @manager.command
 def create_routes(name):
@@ -407,9 +457,6 @@ def init_migration(migrations_dir='migrations', name='migrations'):
     print sp.check_output('python %s/manage.py version_control %s %s' % (migrations_dir,
                                                                          app.config['SQLALCHEMY_DATABASE_URI'],
                                                                          migrations_dir),
-                          shell=True)
-    print sp.check_output('migrate manage dbmigrate.py --repository=%s --url=%s' % (migrations_dir,
-                                                                                    app.config['SQLALCHEMY_DATABASE_URI']),
                           shell=True)
 
 if __name__ == '__main__':
