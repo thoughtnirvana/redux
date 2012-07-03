@@ -5,7 +5,6 @@ Misc. utilities.
 import re, os, subprocess
 
 import config
-from flask import request, render_template
 
 def set_trace():
     """
@@ -52,6 +51,7 @@ def auto_version(endpoint, **values):
     return url_for(endpoint, **values)
 
 def simple_form(form_type, template, success):
+    from flask import render_template
     def fn():
         form = form_type()
         if form.validate_on_submit():
@@ -60,6 +60,7 @@ def simple_form(form_type, template, success):
     return fn
 
 def _simple_processor(processor, ext_private, ext_public):
+    from flask import request
     request_path = request.path
     if not request_path.endswith(ext_public):
         return
@@ -91,3 +92,13 @@ def coffee_to_js():
                                                                    '-c', in_file], shell=False)
     return _simple_processor(processor, '.coffee', '.js')
 
+def http_auth(username, password, *endpoints):
+    from flask import request, Response
+    def protected():
+        if request.endpoint in endpoints:
+            auth = request.authorization
+            if not auth or not (auth.username == username and auth.password == password):
+                return Response('Could not verify your access level for that URL.\n'
+                                'You have to login with proper credentials', 401,
+                                {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    return protected
