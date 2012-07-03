@@ -138,6 +138,7 @@ def create_model(name, fields=''):
             model = '%(imports)s\n%(rest)s' % dict(imports=create_model.imports,
                                                 rest=model)
         out_file.write(model)
+    create_model_form(name, fields)
     create_migration(model_name, 'Create %s' % model_name, fields)
 
 create_model.model_scaffold = '''
@@ -242,7 +243,7 @@ routes += [
 '''
 
 @manager.command
-def create_form(name):
+def create_model_form(name, fields=''):
     """
     Creates model form scaffold.
     """
@@ -253,20 +254,67 @@ def create_form(name):
         model_name = name
         output_file = 'forms.py'
     file_exists = os.path.exists(output_file)
-    form = create_form.form_scaffold % dict(model_name=model_name.capitalize())
+    field_args = []
+    for f in fields.split():
+        field_args.append(create_model_form.field_args % dict(field_name=f))
+    form = create_model_form.form_scaffold % dict(model_name=model_name.capitalize(), field_args=''.join(field_args))
+    with open(output_file, 'a') as out_file:
+        if not file_exists:
+            form = '''%(imports)s\n%(rest)s''' % dict(imports=create_model_form.imports,
+                                                      rest=form)
+        out_file.write(form)
+
+create_model_form.imports = '''import flaskext.wtf as wtf
+from flaskext.wtf import Form, validators
+from wtforms.ext.sqlalchemy.orm import model_form
+import models
+'''
+create_model_form.form_scaffold = '''
+%(model_name)sForm = model_form(models.%(model_name)s, Form, field_args = {%(field_args)s
+})
+'''
+create_model_form.field_args = '''
+    '%(field_name)s': {'validators': []},'''
+
+@manager.command
+def create_form(name, fields=''):
+    """
+    Creates model form scaffold.
+    """
+    if '/' in name:
+        blueprint_name, model_name = name.split('/')
+        output_file = 'blueprints/%s/forms.py' % blueprint_name
+    else:
+        model_name = name
+        output_file = 'forms.py'
+    file_exists = os.path.exists(output_file)
+    field_declares = []
+    for f in fields.split():
+        splitted = f.split(':')
+        if len(splitted) > 1:
+            field_name, field_type = splitted[0], '%s' % splitted[1]
+        else:
+            field_name, field_type = splitted[0], 'Text'
+        field_declares.append(create_form.field_declares % dict(field_name=f, field_type=field_type,
+                                                                readable_field_name=f.capitalize()))
+    form = create_form.form_scaffold % dict(name=model_name.capitalize(), field_declares=''.join(field_declares))
     with open(output_file, 'a') as out_file:
         if not file_exists:
             form = '''%(imports)s\n%(rest)s''' % dict(imports=create_form.imports,
                                                       rest=form)
         out_file.write(form)
 
-create_form.imports = '''from flaskext.wtf import Form
+create_form.imports = '''import flaskext.wtf as wtf
+from flaskext.wtf import Form, validators
 from wtforms.ext.sqlalchemy.orm import model_form
 import models
 '''
 create_form.form_scaffold = '''
-%(model_name)sForm = model_form(models.%(model_name)s, Form)
+class %(name)sForm(Form):%(field_declares)s
 '''
+create_form.field_declares = '''
+    %(field_name)s = wtf.%(field_type)sField('%(readable_field_name)s', validators=[])'''
+
 
 @manager.command
 def create_views(name, fields=''):
@@ -280,8 +328,12 @@ def create_views(name, fields=''):
         model_name = name
         output_file = 'views.py'
     file_exists = os.path.exists(output_file)
+    form_data = []
+    for f in fields.split():
+        form_data.append('form.%s.data' % f.split(':')[0])
     views = create_views.views_scaffold % dict(name=model_name.lower(),
-                                              model_name=model_name.capitalize())
+                                               model_name=model_name.capitalize(),
+                                               form_data=', '.join(form_data))
     with open(output_file, 'a') as out_file:
         if not file_exists:
             views = '''%(imports)s\n%(rest)s''' % dict(imports=create_views.imports,
@@ -306,8 +358,7 @@ def %(name)s_show(id):
 def %(name)s_new():
     form = forms.%(model_name)sForm()
     if form.validate_on_submit():
-        %(name)s = models.%(model_name)s(form.title.data,
-                    form.body.data)
+        %(name)s = models.%(model_name)s(%(form_data)s)
         db.session.add(%(name)s)
         db.session.commit()
         return redirect(url_for('%(name)s.index'))
@@ -445,7 +496,6 @@ def create_scaffold(name, fields=''):
     Creates scaffold.
     """
     create_model(name, fields)
-    create_form(name)
     create_views(name, fields)
     create_routes(name)
 
