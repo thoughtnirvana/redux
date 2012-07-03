@@ -32,6 +32,7 @@ def init(basic_app=False):
     app = Flask(__name__)
     app.config.from_object(settings)
     config.app = app
+    toolbar = DebugToolbarExtension(app)
     # Init SQLAlchemy wrapper.
     config.db = SQLAlchemy(app)
     if not basic_app:
