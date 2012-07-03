@@ -20,7 +20,10 @@ SECRET_KEY = '\x18[F;(\x99\xbcF\xc8\xe3\xb5\x89R\xb7[\x17H\x85\xd8\xa9,\xbf\x95\
 BLUEPRINTS = []
 
 #: Before request middlewares.
-BEFORE_REQUESTS = [utils.less_to_css, utils.coffee_to_js]
+BEFORE_REQUESTS = [
+    utils.less_to_css,
+    utils.coffee_to_js,
+]
 
 #: After request middlewares.
 AFTER_REQUESTS = []
@@ -42,7 +45,7 @@ LOG_HANDLERS = []
 TEMPLATE_FILTERS = []
 
 #: Jinja2 context processors.
-#CONTEXT_PROCESSORS = {name: val} 
+#CONTEXT_PROCESSORS = {name: val}
 CONTEXT_PROCESSORS = {
     'auto_version': utils.auto_version,
 }

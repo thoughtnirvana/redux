@@ -11,3 +11,6 @@ CACHE_TYPE = 'simple'
 
 #: webassets settings.
 ASSETS_DEBUG = True
+#: Session signing key.
+# setting a string key. flask debugtoolbar was concatenating this with strings and failing.
+SECRET_KEY = '8095d1aab8d98613102593955e48258eda86d135'
