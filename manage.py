@@ -381,7 +381,7 @@ def %(name)s_delete(id):
     %(name)s = models.%(model_name)s.query.get(id)
     db.session.delete(%(name)s)
     db.session.commit()
-    return redirect(url_for('%(name)s.index', id=id))
+    return redirect(url_for('%(name)s.index'))
 '''
 
 @manager.command
