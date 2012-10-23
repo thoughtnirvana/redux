@@ -1,7 +1,7 @@
 !5
 html lang="en"
   head
-    title Redux
+    / title Title
     @block meta_tags
     - assets filters='cssmin', output='css/packed.css', 'css/bootstrap.css', 'css/bootstrap-responsive.css', 'css/base.css'
       link rel="stylesheet" type="text/css" href="=ASSET_URL"
@@ -11,8 +11,8 @@ html lang="en"
   body
     .navbar.navbar-fixed-top
       .navbar-inner
-        .container-fluid
-          a.brand href="#" Redux
+        %div.container-fluid
+          / a.brand href="#" Brand
     - from 'helpers.slim' import flashed
     .container-fluid.main-container
       = flashed()
