@@ -94,8 +94,9 @@ def set_blueprints(app, blueprints):
         blueprint_object = import_string('%s:BLUEPRINT' % blueprint, silent=True)
         if not blueprint_object:
             blueprint_name, blueprint_import_name = blueprint.split('.')[-1], blueprint
+            static_url_path = '/static' if url_prefix else '/static/%s' % blueprint_name
             options = dict(static_folder='static', template_folder='templates',
-                           static_url_path='/static/%s' % blueprint_name)
+                           static_url_path=static_url_path)
             blueprint_object = Blueprint(blueprint_name, blueprint_import_name, **options)
         blueprint_routes = import_string('%s.urls:routes' % blueprint_import_name, silent=True)
         if blueprint_routes:
