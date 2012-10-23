@@ -17,6 +17,9 @@ closure
 jsmin
 cssmin
 
+# db migrations
+alembic
+
 # Dev requirements
 pylint
 ipython
