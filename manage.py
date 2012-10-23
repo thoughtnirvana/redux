@@ -142,7 +142,6 @@ def create_model(name, fields=''):
                                                 rest=model)
         out_file.write(model)
     create_model_form(name, fields)
-    #create_migration(model_name, 'Create %s' % model_name, fields)
 
 create_model.model_scaffold = '''
 
@@ -156,53 +155,6 @@ create_model.init_method = '''
     def __init__(self%(args)s):
         %(body)s
 '''
-
-@manager.command
-def create_migration(name, description, fields=''):
-    print sp.check_output('python dbmigrate.py script "%s"' % description, shell=True)
-    migration_file_pat = re.sub(r'\s+', '_', description)
-    migration_file = [f for f in os.listdir('migrations/versions') if re.search(migration_file_pat, f)]
-    if not migration_file:
-        print >>sys.stderr, "ERROR: Migration file not found. Unable to create migration"
-        return
-    if len(migration_file) > 1:
-        print >>sys.stderr, "ERROR: Ambiguous description for migration file."
-        return
-    migration_file = migration_file[0]
-    columns = []
-    for f in fields.split():
-        splitted = f.split(':')
-        if len(splitted) > 1:
-            field_name, field_type = splitted[0], '%s' % splitted[1]
-        else:
-            field_name, field_type = splitted[0], 'Text'
-        columns.append(create_migration.column % dict(field_name=field_name, field_type=field_type))
-    migration = create_migration.migration_scaffold % dict(name=name, columns=''.join(columns))
-    with open('migrations/versions/%s' % migration_file, 'w') as out_file:
-        out_file.write(migration)
-
-create_migration.migration_scaffold = '''from sqlalchemy import *
-from migrate import *
-
-meta = MetaData()
-
-%(name)s = Table(
-    '%(name)s', meta,
-    Column('id', Integer, primary_key=True),%(columns)s
-)
-
-
-def upgrade(migrate_engine):
-    meta.bind = migrate_engine
-    %(name)s.create()
-
-
-def downgrade(migrate_engine):
-    meta.bind = migrate_engine
-    %(name)s.drop()
-'''
-create_migration.column = '''
-    Column('%(field_name)s', %(field_type)s),'''
 
 
 @manager.command
@@ -259,7 +211,8 @@ def create_model_form(name, fields=''):
     file_exists = os.path.exists(output_file)
     field_args = []
     for f in fields.split():
-        field_args.append(create_model_form.field_args % dict(field_name=f))
+        field_name = f.split(':')[0]
+        field_args.append(create_model_form.field_args % dict(field_name=field_name))
     form = create_model_form.form_scaffold % dict(model_name=model_name.capitalize(), field_args=''.join(field_args))
     with open(output_file, 'a') as out_file:
         if not file_exists:
@@ -502,16 +455,6 @@ def create_scaffold(name, fields=''):
     create_views(name, fields)
     create_routes(name)
 
-@manager.command
-def init_migration(migrations_dir='migrations', name='migrations'):
-    """
-    Initializes migrations for the db.
-    """
-    print sp.check_output('migrate create %s %s' % (migrations_dir, name), shell=True)
-    print sp.check_output('python %s/manage.py version_control %s %s' % (migrations_dir,
-                                                                         app.config['SQLALCHEMY_DATABASE_URI'],
-                                                                         migrations_dir),
-                          shell=True)
 
 if __name__ == '__main__':
     manager.run()
