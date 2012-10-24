@@ -6,6 +6,7 @@ class Post(db.Model):
     name = db.Column(db.String(80))
     title = db.Column(db.String(200))
     content = db.Column(db.Text)
+    tags = db.Column(db.String(200))
 
     comments = db.relationship('Comment', backref='post', lazy='dynamic', cascade='all, delete-orphan')
 

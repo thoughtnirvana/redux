@@ -8,6 +8,7 @@ PostForm = model_form(models.Post, Form, field_args = {
     'name': {'validators': [validators.required()]},
     'title': {'validators': [validators.required(), validators.length(min=5)]},
     'content': {'validators': []},
+    'tags': {'validators': []},
 })
 
 CommentForm = model_form(models.Comment, Form, field_args = {
