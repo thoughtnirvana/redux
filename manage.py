@@ -2,7 +2,7 @@ import re, os, signal, sys
 import subprocess as sp
 import werkzeug.serving
 from werkzeug import import_string
-from flask.ext.script import Manager, prompt_bool
+from flask.ext.script import Manager
 import main
 
 app = main.init()
