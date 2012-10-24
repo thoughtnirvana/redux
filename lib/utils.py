@@ -92,16 +92,26 @@ def coffee_to_js():
                                                                    '-c', in_file], shell=False)
     return _simple_processor(processor, '.coffee', '.js')
 
-def http_auth(username, password, *endpoints):
+def http_auth(username, password, include, *endpoints):
     from flask import request, Response
     def protected():
-        if request.endpoint in endpoints:
+        if include:
+            predicate = request.endpoint in endpoints
+        else:
+            predicate = request.endpoint not in endpoints
+        if predicate:
             auth = request.authorization
             if not auth or not (auth.username == username and auth.password == password):
                 return Response('Could not verify your access level for that URL.\n'
                                 'You have to login with proper credentials', 401,
                                 {'WWW-Authenticate': 'Basic realm="Login Required"'})
     return protected
+
+def http_do_auth(username, password, *endpoints):
+    return http_auth(username, password, True, *endpoints)
+
+def http_dont_auth(username, password, *endpoints):
+    return http_auth(username, password, False, *endpoints)
 
 def row_to_dict(row):
     return dict((col, getattr(row, col)) for col in row.__table__.columns.keys())
