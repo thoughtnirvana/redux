@@ -54,6 +54,9 @@ CONTEXT_PROCESSORS = {
 #ERROR_HANDLERS = [(404, lambda error: ("Page not found", 404))]
 ERROR_HANDLERS = []
 
+HTTP_USERNAME = 'admin'
+HTTP_PASSWORD = 'password'
+
 # Load appropriate settings.
 environ = os.environ.get('FLASK_ENV')
 # Set environment specific settings.
