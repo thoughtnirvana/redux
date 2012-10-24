@@ -102,3 +102,9 @@ def http_auth(username, password, *endpoints):
                                 'You have to login with proper credentials', 401,
                                 {'WWW-Authenticate': 'Basic realm="Login Required"'})
     return protected
+
+def row_to_dict(row):
+    return dict((col, getattr(row, col)) for col in row.__table__.columns.keys())
+
+def rows_to_dict(rows):
+    return map(row_to_dict, rows)
