@@ -17,7 +17,8 @@
 
   p
     strong Tags:
-  p {{ post.tags and post.tags.split()|join(', ') or "" }}
+  p
+    = post.tags and post.tags.split()|join(', ') or ""
   a href="{{ url_for('.edit', id\=post.id) }}" class="btn btn-primary btn-small" Edit
   a href="{{ url_for('.index') }}" class="btn btn-primary btn-small" Back
 
