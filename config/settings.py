@@ -5,6 +5,7 @@ object.
 """
 import sys
 import os
+import importlib
 from lib.middlewares import MethodRewriteMiddleware
 from lib import utils
 
@@ -63,7 +64,8 @@ environ = os.environ.get('FLASK_ENV')
 if environ:
     _this_module = sys.modules[__name__]
     try:
-        _m = __import__('%s_settings.py' % environ)
+        #_m = __import__('config.%s_settings' % environ)
+        _m = importlib.import_module('config.%s_settings' % environ)
     except ImportError, ex:
         pass
     else:
