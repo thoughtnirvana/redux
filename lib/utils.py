@@ -12,12 +12,8 @@ def set_trace():
     """
     from config import app
     if not app.debug: return
-    try:
-        import ipdb
-        ipdb.set_trace()
-    except ImportError:
-        import pdb
-        pdb.set_trace()
+    import pdb
+    pdb.set_trace()
 
 
 def auto_version(endpoint, **values):
