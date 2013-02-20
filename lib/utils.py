@@ -91,16 +91,17 @@ def coffee_to_js():
 def http_auth(username, password, include, *endpoints):
     from flask import request, Response
     def protected():
-        if include:
-            predicate = request.endpoint in endpoints
-        else:
-            predicate = request.endpoint not in endpoints
-        if predicate:
-            auth = request.authorization
-            if not auth or not (auth.username == username and auth.password == password):
-                return Response('Could not verify your access level for that URL.\n'
-                                'You have to login with proper credentials', 401,
-                                {'WWW-Authenticate': 'Basic realm="Login Required"'})
+        if request and request.endpoint and not request.endpoint.startswith('_'):
+            if include:
+                predicate = request.endpoint in endpoints
+            else:
+                predicate = request.endpoint not in endpoints
+            if predicate:
+                auth = request.authorization
+                if not auth or not (auth.username == username and auth.password == password):
+                    return Response('Could not verify your access level for that URL.\n'
+                                    'You have to login with proper credentials', 401,
+                                    {'WWW-Authenticate': 'Basic realm="Login Required"'})
     return protected
 
 def http_do_auth(username, password, *endpoints):
