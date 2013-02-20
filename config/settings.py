@@ -64,7 +64,6 @@ environ = os.environ.get('FLASK_ENV')
 if environ:
     _this_module = sys.modules[__name__]
     try:
-        #_m = __import__('config.%s_settings' % environ)
         _m = importlib.import_module('config.%s_settings' % environ)
     except ImportError, ex:
         pass
