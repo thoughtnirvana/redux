@@ -1,4 +1,4 @@
-import re, os, signal, sys
+import os, signal, sys
 import subprocess as sp
 import werkzeug.serving
 from werkzeug import import_string
@@ -70,7 +70,13 @@ def db_dropall():
 @manager.command
 def create_blueprint(name, scaffold=False, fields=''):
     """
-    Creates app template.
+    Creates app folder structure. Optionally, scaffolds the app with models, forms, views and templates.
+    Eg.
+        # Create blueprint with scaffold.
+        python manage.py create_blueprint post -s -f 'name:String(80) title:String(200) content:Text
+
+        # Create blueprint with scaffold.
+        python manage.py create_blueprint post -f 'name:String(80) title:String(200) content:Text
     """
     print sp.check_output('mkdir -p blueprints/%(name)s/templates/%(name)s' % locals(), shell=True),
     for static_dir in ('css', 'js', 'img'):
@@ -103,7 +109,13 @@ def deps_update():
 @manager.command
 def create_model(name, fields=''):
     """
-    Creates model scaffold.
+    Creates model scaffold and the model form.
+    Eg:
+        # Create top level model.
+        python manage.py create_model tag -f 'name:String(80) post_id:Integer'
+
+        # Create model within a blueprint.
+        python manage.py create_model post/tag -f 'name:String(80) post_id:Integer'
     """
     if '/' in name:
         blueprint_name, model_name = name.split('/')
@@ -161,6 +173,12 @@ create_model.init_method = '''
 def create_routes(name):
     """
     Creates routes scaffold.
+    Eg.
+        # Top level routes.
+        python manage.py create_routes post
+
+        # Blueprint routes.
+        python manage.py create_routes post/tag
     """
     if '/' in name:
         blueprint_name, model_name = name.split('/')
@@ -201,6 +219,8 @@ routes += [
 def create_model_form(name, fields=''):
     """
     Creates model form scaffold.
+    Eg:
+        python manage.py create_model tag -f 'name:String(80) post_id:Integer'
     """
     if '/' in name:
         blueprint_name, model_name = name.split('/')
@@ -232,50 +252,17 @@ create_model_form.form_scaffold = '''
 create_model_form.field_args = '''
     '%(field_name)s': {'validators': []},'''
 
-@manager.command
-def create_form(name, fields=''):
-    """
-    Creates model form scaffold.
-    """
-    if '/' in name:
-        blueprint_name, model_name = name.split('/')
-        output_file = 'blueprints/%s/forms.py' % blueprint_name
-    else:
-        model_name = name
-        output_file = 'forms.py'
-    file_exists = os.path.exists(output_file)
-    field_declares = []
-    for f in fields.split():
-        splitted = f.split(':')
-        if len(splitted) > 1:
-            field_name, field_type = splitted[0], '%s' % splitted[1]
-        else:
-            field_name, field_type = splitted[0], 'Text'
-        field_declares.append(create_form.field_declares % dict(field_name=f, field_type=field_type,
-                                                                readable_field_name=f.capitalize()))
-    form = create_form.form_scaffold % dict(name=model_name.capitalize(), field_declares=''.join(field_declares))
-    with open(output_file, 'a') as out_file:
-        if not file_exists:
-            form = '''%(imports)s\n%(rest)s''' % dict(imports=create_form.imports,
-                                                      rest=form)
-        out_file.write(form)
-
-create_form.imports = '''import flaskext.wtf as wtf
-from flaskext.wtf import Form, validators
-from wtforms.ext.sqlalchemy.orm import model_form
-import models
-'''
-create_form.form_scaffold = '''
-class %(name)sForm(Form):%(field_declares)s
-'''
-create_form.field_declares = '''
-    %(field_name)s = wtf.%(field_type)sField('%(readable_field_name)s', validators=[])'''
-
 
 @manager.command
-def create_views(name, fields=''):
+def create_view(name, fields=''):
     """
-    Creates views scaffold.
+    Creates view scaffold. It also creates the templates.
+    Eg.
+        # Top level views.
+        python manage.py create_view comment -f 'commenter body post_id'
+
+        # Blueprint views.
+        python manage.py create_view post/comment -f 'commenter body post_id'
     """
     if '/' in name:
         blueprint_name, model_name = name.split('/')
@@ -287,22 +274,22 @@ def create_views(name, fields=''):
     form_data = []
     for f in fields.split():
         form_data.append('form.%s.data' % f.split(':')[0])
-    views = create_views.views_scaffold % dict(name=model_name.lower(),
+    views = create_view.views_scaffold % dict(name=model_name.lower(),
                                                model_name=model_name.capitalize(),
                                                form_data=', '.join(form_data))
     with open(output_file, 'a') as out_file:
         if not file_exists:
-            views = '''%(imports)s\n%(rest)s''' % dict(imports=create_views.imports,
+            views = '''%(imports)s\n%(rest)s''' % dict(imports=create_view.imports,
                                                        rest=views)
         out_file.write(views)
     create_templates(name, fields)
 
-create_views.imports = '''from flask import render_template, redirect, url_for, flash, request
+create_view.imports = '''from flask import render_template, redirect, url_for, flash, request
 from config import db
 import models
 import forms
 '''
-create_views.views_scaffold = '''
+create_view.views_scaffold = '''
 def %(name)s_index():
     object_list = models.%(model_name)s.query.all()
     return render_template('%(name)s/index.slim', object_list=object_list)
@@ -339,6 +326,15 @@ def %(name)s_delete(id):
 
 @manager.command
 def create_templates(name, fields=''):
+    """
+    Creates templates.
+    Eg.
+        # Top level templates.
+        python manage.py create_templates comment -f 'commenter body post_id'
+
+        # Blueprint templates.
+        python manage.py create_templates post/comment -f 'commenter body post_id'
+    """
     if '/' in name:
         blueprint_name, name = name.split('/')
         name = name.lower()
@@ -382,18 +378,18 @@ def create_templates(name, fields=''):
 
 create_templates.form_scaffold = '''- from 'helpers.slim' import render_field
 
-form method="POST" class="well"
+form method="POST"
   = form.hidden_tag()%(fields)s
   .field
-    input type="submit" class="btn btn-success"
+    input type="submit"
 '''
 create_templates.form_field = '''
-  = render_field(form.%(field_name)s, class\="span4")'''
+  = render_field(form.%(field_name)s)'''
 create_templates.index_scaffold = '''- extends 'layout.slim'
 - from 'helpers.slim' import delete_button
 
 - block content
-  table class="table"
+  table
     thead
       tr%(field_headers)s
         %%th
@@ -403,13 +399,13 @@ create_templates.index_scaffold = '''- extends 'layout.slim'
       - for %(name)s in object_list
         tr%(fields)s
           td
-            a.btn.btn-mini.btn-info href="{{ url_for('.show', id\=%(name)s.id) }}" Show
+            a href="{{ url_for('.show', id\=%(name)s.id) }}" Show
           td
-            a.btn.btn-mini.btn-info href="{{ url_for('.edit', id\=%(name)s.id) }}" Edit
+            a href="{{ url_for('.edit', id\=%(name)s.id) }}" Edit
           td
             = delete_button(url_for('.delete', id\=%(name)s.id), 'Delete')
 
-  a href="=url_for('.new')" class="btn btn-primary btn-small" New %(name)s
+  a href="=url_for('.new')" New %(name)s
 '''
 create_templates.index_field = '''
           td = %(name)s.%(field_name)s'''
@@ -420,8 +416,8 @@ create_templates.show_scaffold = '''- extends 'layout.slim'
 
 - block content
   = flashed()%(fields)s
-  a href="{{ url_for('.edit', id\=%(name)s.id) }}" class="btn btn-primary btn-small" Edit
-  a href="{{ url_for('.index') }}" class="btn btn-primary btn-small" Back
+  a href="{{ url_for('.edit', id\=%(name)s.id) }}" Edit
+  a href="{{ url_for('.index') }}" Back
 '''
 create_templates.show_field = '''
   p
@@ -431,28 +427,26 @@ create_templates.show_field = '''
 create_templates.edit_scaffold = '''- extends 'layout.slim'
 
 - block content
-  .span6
     h2 Editing %(name)s
     - include '%(name)s/_%(name)s_form.slim'
-    a href="{{ url_for('.show', id\=%(name)s.id) }}" class="btn btn-primary btn-small" Show
-    a href="{{ url_for('.index') }}" class="btn btn-primary btn-small" Back
+    a href="{{ url_for('.show', id\=%(name)s.id) }}" Show
+    a href="{{ url_for('.index') }}" Back
 '''
 create_templates.new_scaffold = '''- extends 'layout.slim'
 
 - block content
-  .span6
     h2 Creating new %(name)s
     - include '%(name)s/_%(name)s_form.slim'
-    a href="=url_for('.index')" class="btn btn-primary btn-small" Back
+    a href="=url_for('.index')" Back
 '''
 
 @manager.command
 def create_scaffold(name, fields=''):
     """
-    Creates scaffold.
+    Creates scaffold - model, model form, views, templates and routes.
     """
     create_model(name, fields)
-    create_views(name, fields)
+    create_view(name, fields)
     create_routes(name)
 
 
