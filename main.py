@@ -19,7 +19,6 @@ from flask.ext.debugtoolbar import DebugToolbarExtension
 import config
 import config.urls as urls
 import config.settings as settings
-from lib.utils import set_trace
 
 def init(basic_app=False):
     """
@@ -32,11 +31,11 @@ def init(basic_app=False):
     app = Flask(__name__)
     app.config.from_object(settings)
     config.app = app
-    toolbar = DebugToolbarExtension(app)
     # Init SQLAlchemy wrapper.
     config.db = SQLAlchemy(app)
     if not basic_app:
-        #toolbar = DebugToolbarExtension(app)
+        if app.debug:
+            DebugToolbarExtension(app)
         #: Wrap the `app` with `Babel` for i18n.
         Babel(app)
         Environment(app)
