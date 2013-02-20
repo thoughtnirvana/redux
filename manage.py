@@ -246,7 +246,7 @@ from wtforms.ext.sqlalchemy.orm import model_form
 import models
 '''
 create_model_form.form_scaffold = '''
-%(model_name)sForm = model_form(models.%(model_name)s, Form, field_args = {%(field_args)s
+%(model_name)sForm = model_form(models.%(model_name)s, model.db.session, Form, field_args = {%(field_args)s
 })
 '''
 create_model_form.field_args = '''
