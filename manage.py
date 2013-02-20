@@ -5,7 +5,7 @@ from werkzeug import import_string
 from flask.ext.script import Manager
 import main
 
-app = main.init()
+app = main.app
 manager = Manager(app)
 
 from config import db

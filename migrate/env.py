@@ -8,7 +8,7 @@ import sys, os
 sys.path.append(os.path.abspath('%s/..' % os.path.dirname(__file__)))
 
 import main
-app = main.init()
+app = main.app
 
 from config import settings, db
 

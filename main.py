@@ -20,11 +20,9 @@ import config
 import config.urls as urls
 import config.settings as settings
 
-def init(basic_app=False):
+def init():
     """
     Sets up flask application object `app` and returns it.
-    If `basic_app` is true, it creates the app and the db object.
-    Mainly useful for using models outside of the app.
     """
     # Instantiate main app, load configs, register modules, set
     # url patterns and return the `app` object.
@@ -33,29 +31,28 @@ def init(basic_app=False):
     config.app = app
     # Init SQLAlchemy wrapper.
     config.db = SQLAlchemy(app)
-    if not basic_app:
-        if app.debug:
-            DebugToolbarExtension(app)
-        #: Wrap the `app` with `Babel` for i18n.
-        Babel(app)
-        Environment(app)
-        config.cache = Cache(app)
-        app.jinja_env.add_extension(SlimishExtension)
-        app.jinja_env.slim_debug = app.debug
-        config.bcrypt = Bcrypt(app)
-        # Other initializations.
-        for fn, values in [(set_middlewares, getattr(settings, 'MIDDLEWARES', None)),
-                           (set_context_processors, getattr(settings, 'CONTEXT_PROCESSORS', None)),
-                           (set_template_filters, getattr(settings, 'TEMPLATE_FILTERS', None)),
-                           (set_before_handlers, getattr(settings, 'BEFORE_REQUESTS', None)),
-                           (set_after_handlers, getattr(settings, 'AFTER_REQUESTS', None)),
-                           (set_log_handlers, getattr(settings, 'LOG_HANDLERS', None)),
-                           (set_error_handlers, getattr(settings, 'ERROR_HANDLERS', None)),
-                           (set_blueprints, getattr(settings, 'BLUEPRINTS', None))]:
-            if values:
-                fn(app, values)
-        # URL rules.
-        urls.set_urls(app)
+    if app.debug:
+        DebugToolbarExtension(app)
+    #: Wrap the `app` with `Babel` for i18n.
+    Babel(app)
+    Environment(app)
+    config.cache = Cache(app)
+    app.jinja_env.add_extension(SlimishExtension)
+    app.jinja_env.slim_debug = app.debug
+    config.bcrypt = Bcrypt(app)
+    # Other initializations.
+    for fn, values in [(set_middlewares, getattr(settings, 'MIDDLEWARES', None)),
+                        (set_context_processors, getattr(settings, 'CONTEXT_PROCESSORS', None)),
+                        (set_template_filters, getattr(settings, 'TEMPLATE_FILTERS', None)),
+                        (set_before_handlers, getattr(settings, 'BEFORE_REQUESTS', None)),
+                        (set_after_handlers, getattr(settings, 'AFTER_REQUESTS', None)),
+                        (set_log_handlers, getattr(settings, 'LOG_HANDLERS', None)),
+                        (set_error_handlers, getattr(settings, 'ERROR_HANDLERS', None)),
+                        (set_blueprints, getattr(settings, 'BLUEPRINTS', None))]:
+        if values:
+            fn(app, values)
+    # URL rules.
+    urls.set_urls(app)
     return app
 
 def set_middlewares(app, middlewares):
@@ -195,8 +192,8 @@ def set_app_error_handlers(app, error_handlers):
     for code, fn in error_handlers:
         fn = app.app_errorhandler(code)(fn)
 
+app = init()
 if __name__ == '__main__':
     #: Create the `app` object via :func:`init`. Run the `app`
     #: if called standalone.
-    app = init()
     app.run()
