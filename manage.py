@@ -240,8 +240,8 @@ def create_model_form(name, fields=''):
                                                       rest=form)
         out_file.write(form)
 
-create_model_form.imports = '''import flaskext.wtf as wtf
-from flaskext.wtf import Form, validators
+create_model_form.imports = '''import flask.ext.wtf as wtf
+from flask.ext.wtf import Form, validators
 from wtforms.ext.sqlalchemy.orm import model_form
 import models
 '''
