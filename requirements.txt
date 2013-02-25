@@ -25,7 +25,5 @@ flask-debugtoolbar
 pylint
 ipython
 ipdb
-tornado
 
 gevent
-gunicorn
