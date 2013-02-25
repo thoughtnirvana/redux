@@ -3,4 +3,4 @@
 - for comment in post.comments
   p <strong>{{ comment.commenter }}</strong> <em>says</em> 
   p = comment.body
-  = delete_button(url_for('.comment_delete', post_id\=post_id, id\=comment.id), 'Delete')
+  = delete_button(url_for('.comment_delete', post_id=post_id, id=comment.id), 'Delete')
