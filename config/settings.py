@@ -5,6 +5,7 @@ object.
 """
 import sys
 import os
+import logging
 import importlib
 from lib.middlewares import MethodRewriteMiddleware
 from lib import utils
@@ -38,8 +39,23 @@ MIDDLEWARES = [
     MethodRewriteMiddleware,
 ]
 
+stream_logger = logging.StreamHandler()
+stream_logger.setFormatter(logging.Formatter('''
+                                             Message type:       %(levelname)s
+                                             Location:           %(pathname)s:%(lineno)d
+                                             Module:             %(module)s
+                                             Function:           %(funcName)s
+                                             Time:               %(asctime)s
+
+                                             Message:
+
+                                             %(message)s
+                                             '''
+                                            ))
+stream_logger.setLevel(logging.DEBUG)
+
 #: Custom log handlers.
-LOG_HANDLERS = []
+LOG_HANDLERS = [stream_logger]
 
 #: Jinja2 filters.
 #TEMPLATE_FILTERS = [('custom_reverse', lambda x: x[::-1])]
