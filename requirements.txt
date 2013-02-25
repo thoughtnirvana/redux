@@ -21,8 +21,11 @@ cssmin
 alembic
 
 # Dev requirements
+flask-debugtoolbar
 pylint
 ipython
 ipdb
 tornado
+
 gevent
+gunicorn
