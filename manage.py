@@ -246,7 +246,7 @@ from wtforms.ext.sqlalchemy.orm import model_form
 import models
 '''
 create_model_form.form_scaffold = '''
-%(model_name)sForm = model_form(models.%(model_name)s, model.db.session, Form, field_args = {%(field_args)s
+%(model_name)sForm = model_form(models.%(model_name)s, models.db.session, Form, field_args = {%(field_args)s
 })
 '''
 create_model_form.field_args = '''
@@ -399,11 +399,11 @@ create_templates.index_scaffold = '''- extends 'layout.slim'
       - for %(name)s in object_list
         tr%(fields)s
           td
-            a href="{{ url_for('.show', id\=%(name)s.id) }}" Show
+            a href="{{ url_for('.show', id=%(name)s.id) }}" Show
           td
-            a href="{{ url_for('.edit', id\=%(name)s.id) }}" Edit
+            a href="{{ url_for('.edit', id=%(name)s.id) }}" Edit
           td
-            = delete_button(url_for('.delete', id\=%(name)s.id), 'Delete')
+            = delete_button(url_for('.delete', id=%(name)s.id), 'Delete')
 
   a href="=url_for('.new')" New %(name)s
 '''
@@ -416,7 +416,7 @@ create_templates.show_scaffold = '''- extends 'layout.slim'
 
 - block content
   = flashed()%(fields)s
-  a href="{{ url_for('.edit', id\=%(name)s.id) }}" Edit
+  a href="{{ url_for('.edit', id=%(name)s.id) }}" Edit
   a href="{{ url_for('.index') }}" Back
 '''
 create_templates.show_field = '''
@@ -429,7 +429,7 @@ create_templates.edit_scaffold = '''- extends 'layout.slim'
 - block content
     h2 Editing %(name)s
     - include '%(name)s/_%(name)s_form.slim'
-    a href="{{ url_for('.show', id\=%(name)s.id) }}" Show
+    a href="{{ url_for('.show', id=%(name)s.id) }}" Show
     a href="{{ url_for('.index') }}" Back
 '''
 create_templates.new_scaffold = '''- extends 'layout.slim'
