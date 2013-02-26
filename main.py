@@ -12,7 +12,7 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.babel import Babel
 from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.assets import Environment
+from flask.ext.assets import Environment, Bundle
 from flask.ext.debugtoolbar import DebugToolbarExtension
 
 
@@ -35,7 +35,18 @@ def init():
         DebugToolbarExtension(app)
     #: Wrap the `app` with `Babel` for i18n.
     Babel(app)
-    Environment(app)
+
+    # Register all js and css files.
+    assets = Environment(app)
+    assets.register('js_all', Bundle(
+        Bundle('**/*.coffee', filters='coffeescript'),
+        Bundle('**/*.js'),
+        filters='closure_js, gzip', output='js/application.js'))
+    assets.register('css_all', Bundle(
+        Bundle('**/*.less', filters='less'),
+        Bundle('**/*.css'),
+        filters='cssmin, gzip', output='css/application.css'))
+
     config.cache = Cache(app)
     app.jinja_env.add_extension(SlimishExtension)
     app.jinja_env.slim_debug = app.debug
