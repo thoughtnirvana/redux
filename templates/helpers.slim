@@ -13,11 +13,3 @@
         p class="error" =  error
     = field.label
     = (field(**kwargs) | safe)
-
-- macro form_button(action, button_text, method='POST', form_classes='', button_classes='')
-  form method="=method" action="=action" class="inline =form_classes "
-    input type="submit" class="btn btn-mini =button_classes" value="=button_text"
-
-- macro delete_button(action, button_text, method='POST', form_classes='', button_classes='')
-  form method="=method" action="=action" class="inline =form_classes "
-    input type="submit" class="btn btn-mini btn-danger =button_classes" value="=button_text"
