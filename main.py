@@ -101,17 +101,26 @@ def register_assets(app, assets):
             js_files.extend(_append_blueprint_name(name, _get_js_files(static_folder)))
             coffee_files.extend(_append_blueprint_name(name, _get_coffee_files(static_folder)))
 
-    js_all = Bundle(Bundle(*js_files),
-                    Bundle(*coffee_files, filters='coffeescript', output='js/coffee_all.js'),
-                    filters='closure_js', output='js/application.js')
-    assets.register('js_all', js_all)
-    assets.register('js_all_compressed', js_all, filters='gzip', output='js/application.js.gz')
+    js_contents = []
+    if js_files:
+        js_contents.append(Bundle(*js_files))
+    if coffee_files:
+        js_contents.append(Bundle(*coffee_files, filters='coffeescript', output='js/coffee_all.js'))
+    if js_contents:
+        js_all = Bundle(*js_contents, filters='closure_js', output='js/application.js')
+        assets.register('js_all', js_all)
+        assets.register('js_all_compressed', js_all, filters='gzip', output='js/application.js.gz')
 
-    css_all = Bundle(Bundle(*css_files),
-                     Bundle(*less_files, filters='less', output='css/less_all.css'),
-                     filters='cssmin', output='css/application.css')
-    assets.register('css_all', css_all)
-    assets.register('css_all_compressed', css_all, filters='gzip', output='css/application.css.gz')
+    css_contents = []
+    if css_files:
+        css_contents.append(Bundle(*css_files))
+    if less_files:
+        css_contents.append(Bundle(*less_files, filters='less', output='css/less_all.css'))
+    if css_contents:
+        css_all = Bundle(*css_contents,
+                         filters='cssmin', output='css/application.css')
+        assets.register('css_all', css_all)
+        assets.register('css_all_compressed', css_all, filters='gzip', output='css/application.css.gz')
 
 def set_middlewares(app, middlewares):
     """
