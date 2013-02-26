@@ -4,6 +4,8 @@ Implements the main WSGI app. It instantiates and sets it up. It can
 be run stand-alone as a flask application or it can be imported and
 the resulting `app` object be used.
 """
+import glob
+
 from flask import Flask
 from flask import Blueprint
 from slimish_jinja import SlimishExtension
@@ -36,17 +38,6 @@ def init():
     #: Wrap the `app` with `Babel` for i18n.
     Babel(app)
 
-    # Register all js and css files.
-    assets = Environment(app)
-    assets.register('js_all', Bundle(
-        Bundle('**/*.coffee', filters='coffeescript'),
-        Bundle('**/*.js'),
-        filters='closure_js, gzip', output='js/application.js'))
-    assets.register('css_all', Bundle(
-        Bundle('**/*.less', filters='less'),
-        Bundle('**/*.css'),
-        filters='cssmin, gzip', output='css/application.css'))
-
     config.cache = Cache(app)
     app.jinja_env.add_extension(SlimishExtension)
     app.jinja_env.slim_debug = app.debug
@@ -62,9 +53,65 @@ def init():
                         (set_blueprints, getattr(settings, 'BLUEPRINTS', None))]:
         if values:
             fn(app, values)
+
+    # Register all js and css files.
+    assets = Environment(app)
+    register_assets(app, assets)
+
     # URL rules.
     urls.set_urls(app)
     return app
+
+def register_assets(app, assets):
+    """
+    Registers all css and js assets with `assets`
+    """
+    def _get_resource_files(static_folder, resource_folder, resource_ext):
+        return [file[len(static_folder) + 1:] for file in
+                glob.glob(static_folder + '/%s/*.%s' % (resource_folder, resource_ext))]
+
+    def _get_css_files(static_folder):
+        return _get_resource_files(static_folder, 'css', 'css')
+
+    def _get_less_files(static_folder):
+        return _get_resource_files(static_folder, 'css', 'less')
+
+    def _get_js_files(static_folder):
+        return _get_resource_files(static_folder, 'js', 'js')
+
+    def _get_coffee_files(static_folder):
+        return _get_resource_files(static_folder, 'js', 'coffee')
+
+    def _append_blueprint_name(name, files):
+        return ['%s/%s' % (name, f) for f in files]
+
+    static_folder = app.static_folder
+    css_files = _get_css_files(static_folder)
+    less_files = _get_less_files(static_folder)
+    js_files = _get_js_files(static_folder)
+    coffee_files = _get_coffee_files(static_folder)
+
+    for name, bp in app.blueprints.iteritems():
+        if name == 'debugtoolbar':
+            continue
+        static_folder = bp.static_folder
+        if static_folder:
+            css_files.extend(_append_blueprint_name(name, _get_css_files(static_folder)))
+            less_files.extend(_append_blueprint_name(name, _get_less_files(static_folder)))
+            js_files.extend(_append_blueprint_name(name, _get_js_files(static_folder)))
+            coffee_files.extend(_append_blueprint_name(name, _get_coffee_files(static_folder)))
+
+    js_all = Bundle(Bundle(*js_files),
+                    Bundle(*coffee_files, filters='coffeescript', output='js/coffee_all.js'),
+                    filters='closure_js', output='js/application.js')
+    assets.register('js_all', js_all)
+    assets.register('js_all_compressed', js_all, filters='gzip', output='js/application.js.gz')
+
+    css_all = Bundle(Bundle(*css_files),
+                     Bundle(*less_files, filters='less', output='css/less_all.css'),
+                     filters='cssmin', output='css/application.css')
+    assets.register('css_all', css_all)
+    assets.register('css_all_compressed', css_all, filters='gzip', output='css/application.css.gz')
 
 def set_middlewares(app, middlewares):
     """
