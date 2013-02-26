@@ -3,10 +3,13 @@ import subprocess as sp
 import werkzeug.serving
 from werkzeug import import_string
 from flask.ext.script import Manager
+from flask.ext.assets import ManageAssets
 import main
 
 app = main.app
 manager = Manager(app)
+
+manager.add_command("assets", ManageAssets())
 
 from config import db
 
