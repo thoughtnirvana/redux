@@ -389,7 +389,6 @@ form method="POST"
 create_templates.form_field = '''
   = render_field(form.%(field_name)s)'''
 create_templates.index_scaffold = '''- extends 'layout.slim'
-- from 'helpers.slim' import delete_button
 
 - block content
   table
@@ -406,7 +405,7 @@ create_templates.index_scaffold = '''- extends 'layout.slim'
           td
             a href="{{ url_for('.edit', id=%(name)s.id) }}" Edit
           td
-            = delete_button(url_for('.delete', id=%(name)s.id), 'Delete')
+            a href="{{ url_for('.delete', id=%(name)s.id) }}" data-confirm="Are you sure?" data-method="delete" Delete
 
   a href="=url_for('.new')" New %(name)s
 '''
