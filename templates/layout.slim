@@ -4,7 +4,7 @@ html lang="en"
     / title Title
     @block meta_tags
     - assets 'css_all'
-      link rel="stylesheet" type="text/css" href="=ASSET_URL"
+      link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}"
     @block styles
     @block head
 
@@ -15,8 +15,8 @@ html lang="en"
           / a.brand href="#" Brand
     - from 'helpers.slim' import flashed
     .container-fluid.main-container
-      = flashed()
+      {{ flashed() }}
       @block content
       @block footer
     - assets 'js_all'
-      %script type="text/javascript" src="=ASSET_URL"
+      %script type="text/javascript" src="{{ ASSET_URL }}"

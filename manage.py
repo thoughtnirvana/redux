@@ -382,12 +382,12 @@ def create_templates(name, fields=''):
 create_templates.form_scaffold = '''- from 'helpers.slim' import render_field
 
 form method="POST"
-  = form.hidden_tag()%(fields)s
+  {{ form.hidden_tag() }}%(fields)s
   .field
     input type="submit"
 '''
 create_templates.form_field = '''
-  = render_field(form.%(field_name)s)'''
+  {{ render_field(form.%(field_name)s) }}'''
 create_templates.index_scaffold = '''- extends 'layout.slim'
 
 - block content
@@ -407,24 +407,24 @@ create_templates.index_scaffold = '''- extends 'layout.slim'
           td
             a href="{{ url_for('.delete', id=%(name)s.id) }}" data-confirm="Are you sure?" data-method="delete" Delete
 
-  a href="=url_for('.new')" New %(name)s
+  a href="{{ url_for('.new') }}" New %(name)s
 '''
 create_templates.index_field = '''
-          td = %(name)s.%(field_name)s'''
+          td {{ %(name)s.%(field_name)s }}'''
 create_templates.index_field_header = '''
         th %(field_header)s'''
 create_templates.show_scaffold = '''- extends 'layout.slim'
 - from 'helpers.slim' import flashed
 
 - block content
-  = flashed()%(fields)s
+  {{ flashed() }}%(fields)s
   a href="{{ url_for('.edit', id=%(name)s.id) }}" Edit
   a href="{{ url_for('.index') }}" Back
 '''
 create_templates.show_field = '''
   p
     strong %(field_header)s:
-  p = %(name)s.%(field_name)s
+  p {{ %(name)s.%(field_name)s }}
 '''
 create_templates.edit_scaffold = '''- extends 'layout.slim'
 
@@ -439,7 +439,7 @@ create_templates.new_scaffold = '''- extends 'layout.slim'
 - block content
     h2 Creating new %(name)s
     - include '%(name)s/_%(name)s_form.slim'
-    a href="=url_for('.index')" Back
+    a href="{{ url_for('.index') }}" Back
 '''
 
 @manager.command
