@@ -8,4 +8,4 @@ def run_server(app, port=8080):
 
 if __name__ == '__main__':
     import main
-    run_server(main.init())
+    run_server(main.app)
